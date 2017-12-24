@@ -1,0 +1,9 @@
+[package]
+name = "just"
+version = "0.1.0"
+authors = ["Ryan Bigg <git@ryanbigg.com>"]
+
+[dependencies]
+ansi_term = "0.9"
+clap = "2"
+git2 = "0.6"
