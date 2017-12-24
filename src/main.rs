@@ -14,9 +14,11 @@ fn main() {
   .get_matches();
 
   if let Some(matches) = matches.subcommand_matches("add") {
+    let mut url = String::from("https://github.com/");
     let repo = matches.value_of("repo").unwrap();
+    url.push_str(repo);
 
-    match cli::add::run(repo, just::path(repo)) {
+    match cli::add::run(&url, just::path(repo)) {
       Ok(repo) => println!("{}", repo.path().display()),
       Err(err) => {
         println!("{}", Red.paint("Failed to add repo"));
