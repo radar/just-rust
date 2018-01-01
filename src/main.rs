@@ -7,7 +7,7 @@ use ansi_term::Colour::Red;
 use clap::{App, Arg, SubCommand};
 
 fn main() {
-  let matches = App::new("fake").version("v1.0-beta")
+  let matches = App::new("just").version("v1.0-beta")
     .subcommand(SubCommand::with_name("add")
       .arg(Arg::with_name("repo").required(true))
     )
