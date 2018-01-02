@@ -7,3 +7,7 @@ authors = ["Ryan Bigg <git@ryanbigg.com>"]
 ansi_term = "0.9"
 clap = "2"
 git2 = "0.6"
+
+[dev-dependencies]
+tempdir = "0.3"
+

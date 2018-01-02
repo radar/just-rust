@@ -3,8 +3,9 @@ extern crate clap;
 extern crate just;
 mod cli;
 
-use ansi_term::Colour::Red;
+use ansi_term::Colour::{Red, Green};
 use clap::{App, Arg, SubCommand};
+use cli::add;
 
 fn main() {
   let matches = App::new("just").version("v1.0-beta")
@@ -15,14 +16,20 @@ fn main() {
 
   if let Some(matches) = matches.subcommand_matches("add") {
     let mut url = String::from("https://github.com/");
-    let repo = matches.value_of("repo").unwrap();
-    url.push_str(repo);
+    let repo_name = matches.value_of("repo").unwrap();
+    url.push_str(repo_name);
 
-    match cli::add::run(&url, just::path(repo)) {
-      Ok(repo) => println!("{}", repo.path().display()),
-      Err(err) => {
-        println!("{}", Red.paint("Failed to add repo"));
-        println!("{}", Red.paint(err.to_string()))
+    println!("{}", Green.paint(format!("Cloning {}...", repo_name)));
+
+    match add::run(&url, just::path(repo_name)) {
+      Ok(_repo) => println!("{}", Green.paint(format!("Added {}", repo_name))),
+
+      Err(add::AddError::AlreadyExists) => {
+        println!("{}", Red.paint(format!("You have already added {}.", repo_name)));
+      }
+
+      Err(add::AddError::GenericGit2Error) => {
+       println!("{}", Red.paint(format!("Something went wrong. Please try again.")));
       }
     }
   }
