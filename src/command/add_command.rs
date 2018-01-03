@@ -1,7 +1,9 @@
+extern crate clap;
 extern crate git2;
 extern crate just;
 
 use std::path::PathBuf;
+use ansi_term::Colour::{Red, Green};
 
 #[derive(Debug)]
 pub enum AddError {
@@ -25,7 +27,27 @@ impl From<git2::Error> for AddError {
     }
 }
 
-pub fn run(repo: &str, destination: PathBuf) -> Result<git2::Repository, AddError> {
+pub fn run(matches: &clap::ArgMatches) {
+  let mut url = String::from("https://github.com/");
+  let repo_name = matches.value_of("repo").unwrap();
+  url.push_str(repo_name);
+
+  println!("{}", Green.paint(format!("Cloning {}...", repo_name)));
+
+  match execute(&url, just::path(repo_name)) {
+    Ok(_repo) => println!("{}", Green.paint(format!("Added {}", repo_name))),
+
+    Err(AddError::AlreadyExists) => {
+      println!("{}", Red.paint(format!("You have already added {}.", repo_name)));
+    }
+
+    Err(AddError::GenericGit2Error) => {
+     println!("{}", Red.paint(format!("Something went wrong. Please try again.")));
+    }
+  }
+}
+
+fn execute(repo: &str, destination: PathBuf) -> Result<git2::Repository, AddError> {
   match git2::Repository::clone(&repo, &destination) {
     Ok(repo) => Ok(repo),
     Err(err) => Err(AddError::from(err)),
@@ -51,7 +73,7 @@ mod test {
   fn clones_a_new_repo_if_one_does_not_exist () {
     let destination = create_test_directory().unwrap().into_path();
 
-    let result = run("https://github.com/radar/dot-files", destination);
+    let result = execute("https://github.com/radar/dot-files", destination);
 
     assert!(result.is_ok());
   }
@@ -67,7 +89,7 @@ mod test {
     let touch_file = fs::OpenOptions::new().create(true).write(true).open(dotfile);
     assert!(touch_file.is_ok());
 
-    let result = run("https://github.com/radar/dot-files", destination_path);
+    let result = execute("https://github.com/radar/dot-files", destination_path);
     assert!(result.is_err());
   }
 }
